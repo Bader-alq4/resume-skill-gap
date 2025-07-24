@@ -12,24 +12,44 @@ def load_role_skills(path: Path = ROLES_PATH) -> dict[str, list[str]]:
         return json.load(f)
     
 
-def compute_missing(user_skills: list[str], role_skills: list[str]) -> list[str]:
+def compute_missing(user_skills: list[str], role_skills: list[str], threshold: float = 0.8) -> list[str]:
     """
-    Return sorted list of skills required by the role that the user does not have,
-    comparing skills case-insensitively but returning them in their original casing.
+    Return list of role skills that are not semantically similar to any user skill.
+    Uses cosine similarity to find best matches. Anything below threshold is 'missing'.
     """
-    # Map lowercased role skills to original
-    lc_role_map = {skill.lower(): skill for skill in role_skills}
-    role_lc_set = set(lc_role_map.keys())
+    if not role_skills or not user_skills:
+        return sorted(role_skills)
 
-    # Lowercase user skills for comparison
-    user_lc_set = {s.lower().strip() for s in user_skills}
+    # Get embeddings
+    all_skills = list(set(user_skills + role_skills))
+    embeddings = get_embeddings(all_skills)
+    skill_to_index = {s: i for i, s in enumerate(all_skills)}
 
-    # Determine missing in lower-case
-    missing_lc = role_lc_set - user_lc_set
+    missing = []
 
-    # Map back to original casing, sort alphabetically
-    missing = sorted(lc_role_map[lc] for lc in missing_lc)
-    return missing
+    for role_skill in role_skills:
+        best_score = 0.0
+        r_idx = skill_to_index[role_skill]
+        r_vec = embeddings[r_idx]
+        r_norm = np.linalg.norm(r_vec)
+
+        for user_skill in user_skills:
+            # Case-insensitive exact match → full credit
+            if user_skill.strip().lower() == role_skill.strip().lower():
+                best_score = 1.0
+                break
+
+            u_idx = skill_to_index[user_skill]
+            u_vec = embeddings[u_idx]
+            u_norm = np.linalg.norm(u_vec)
+
+            sim = float(np.dot(r_vec, u_vec) / (r_norm * u_norm + 1e-8))
+            best_score = max(best_score, sim)
+
+        if best_score < threshold:
+            missing.append(role_skill)
+
+    return sorted(missing)
 
 def compute_per_skill_score(user_skills: list[str], role_skills: list[str]) -> float:
     """
