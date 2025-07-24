@@ -1,5 +1,7 @@
 import json
 from pathlib import Path # safer and cleaner way to handle file paths than regular strings
+import numpy as np
+from .embedder import get_embeddings
 
 ROLES_PATH = Path(__file__).parent.parent / "roles.json"
 
@@ -8,23 +10,70 @@ ROLES_PATH = Path(__file__).parent.parent / "roles.json"
 def load_role_skills(path: Path = ROLES_PATH) -> dict[str, list[str]]:
     with open(path, "r") as f:
         return json.load(f)
+    
 
+def compute_missing(user_skills: list[str], role_skills: list[str]) -> list[str]:
+    """
+    Return sorted list of skills required by the role that the user does not have,
+    comparing skills case-insensitively but returning them in their original casing.
+    """
+    # Map lowercased role skills to original
+    lc_role_map = {skill.lower(): skill for skill in role_skills}
+    role_lc_set = set(lc_role_map.keys())
 
-# Compare user's skills to the target role's required skills.
-# Returns match %, matched skills, and missing skills.
-def analyze_user_skills(user_skills: list[str], target_role: str) -> dict:
+    # Lowercase user skills for comparison
+    user_lc_set = {s.lower().strip() for s in user_skills}
 
-    all_roles = load_role_skills()
-    required_skills = all_roles.get(target_role, [])
+    # Determine missing in lower-case
+    missing_lc = role_lc_set - user_lc_set
 
-    matched = [skill for skill in required_skills if skill in user_skills]
-    missing = [skill for skill in required_skills if skill not in user_skills]
+    # Map back to original casing, sort alphabetically
+    missing = sorted(lc_role_map[lc] for lc in missing_lc)
+    return missing
 
-    match_score = round(100 * len(matched) / len(required_skills)) if required_skills else 0
+def compute_per_skill_score(user_skills: list[str], role_skills: list[str]) -> float:
+    """
+    Compute a semantic match score between user_skills and role_skills by averaging
+    the best cosine similarity for each required skill.
+    Exact string matches (case-insensitive) get full credit.
+    Returns a percentage (0.0 to 100.0).
+    """
+    if not role_skills or not user_skills:
+        return 0.0
 
-    return {
-        "role": target_role,
-        "match_score": match_score,
-        "matched_skills": matched,
-        "missing_skills": missing
-    }
+    # Embed all unique skills
+    all_skills = list({s for s in user_skills + role_skills})
+    embeds = get_embeddings(all_skills)
+    idx = {skill: i for i, skill in enumerate(all_skills)}
+
+    # Precompute norms
+    norms = np.linalg.norm(embeds, axis=1)
+
+    # Compute per-role-skill similarity
+    sims = []
+    for r in role_skills:
+        r_idx = idx[r]
+        r_vec = embeds[r_idx]
+        r_norm = norms[r_idx]
+
+        best = 0.0
+        for u in user_skills:
+            # Case-insensitive exact match
+            if u.strip().lower() == r.strip().lower():
+                best = 1.0
+                break
+            u_idx = idx[u]
+            u_vec = embeds[u_idx]
+            u_norm = norms[u_idx]
+            sim = float(np.dot(r_vec, u_vec) / (r_norm * u_norm + 1e-8))
+            best = max(best, sim)
+        sims.append(best)
+
+    score = float(np.mean(sims)) * 100.0
+    return round(score, 2)
+
+def compute_match_score(user_skills: list[str], role_skills: list[str]) -> float:
+    """
+    Alias to compute_per_skill_score for backward compatibility.
+    """
+    return compute_per_skill_score(user_skills, role_skills)
