@@ -1,8 +1,14 @@
-from backend.core.recommender import recommend_learning_path
+from backend.core.recommender import get_recommendations
 
-missing = ["Docker", "Kubernetes", "CI/CD"]
+# Define a test list of missing skills
+missing_skills = ["Pandas", "SQL"]
 
-result = recommend_learning_path(missing)
+# Call the recommendation function
+recommendations = get_recommendations(missing_skills)
 
-import json
-print(json.dumps(result, indent=2))
+# Print results
+print("Missing Skills:", missing_skills)
+print("\nRecommendations:")
+print("Courses:", recommendations.get("courses", []))
+print("Projects:", recommendations.get("projects", []))
+print("Certifications:", recommendations.get("certifications", []))
