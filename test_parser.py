@@ -1,11 +1,18 @@
-import json
-from backend.core.parser import parse_resume
+# from backend.core.parser import parse_resume, load_known_skills
 
-with open("BaderAlqasem_resume.pdf", "rb") as f:
-    pdf_bytes = f.read()
+# with open("BaderAlqasem_resume.pdf", "rb") as f:
+#     resume_bytes = f.read()
 
-with open("backend/known_skills.json") as f:
-    known_skills = json.load(f)
+# skills = parse_resume(resume_bytes, load_known_skills())
+# print("Extracted skills:", skills)
 
-skills = parse_resume(pdf_bytes, known_skills)
-print("Extracted skills:", skills)
+
+
+# Manual input test
+from backend.core.parser import extract_user_skills_manual, load_known_skills
+
+known = load_known_skills()
+typed = "pyhton, docker-compose, javscript,  seql,  "
+
+skills = extract_user_skills_manual(typed, known)
+print("Manual input normalized:", skills)
