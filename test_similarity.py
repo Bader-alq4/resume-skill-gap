@@ -4,7 +4,7 @@ from backend.core.embedder import get_embeddings
 import numpy as np
 
 # Words to compare
-skills = ["Math", "Statistics"]
+skills = ["Unix", "Linuix"]
 
 # Get Sentence-BERT embeddings
 a, b = get_embeddings(skills)
