@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  resumeskillgap-backend:
+    container_name: resumeskillgap-backend
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    networks:
+      - resumeskillgap-network
+
+  resumeskillgap-frontend:
+    container_name: resumeskillgap-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - API_BASE_URL=http://resumeskillgap-backend:8000/api
+    depends_on:
+      - resumeskillgap-backend
+    networks:
+      - resumeskillgap-network
+
+networks:
+  resumeskillgap-network:
+    driver: bridge
