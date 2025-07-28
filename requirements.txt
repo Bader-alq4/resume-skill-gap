@@ -10,3 +10,4 @@ sqlalchemy
 pytest
 streamlit
 azure-storage-blob
+supervisor
