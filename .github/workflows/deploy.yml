@@ -1,0 +1,35 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Get the code
+      - uses: actions/checkout@v4
+
+      # 2. Authenticate to Azure
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 3. Log in to ACR
+      - run: az acr login --name ${{ secrets.ACR_NAME }}
+
+      # 4. Build & push backend
+      - run: |
+          docker build -f Dockerfile.backend \
+            -t ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest
+
+      # 5. Deploy backend to its Web App
+      - run: |
+          az webapp config container set \
+            --name ${{ secrets.BACKEND_APP }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest \
+            --docker-registry-server-url https://${{ secrets.ACR_NAME }}.azurecr.io \
+            --only-show-errors
