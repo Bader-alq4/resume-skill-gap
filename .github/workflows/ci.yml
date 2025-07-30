@@ -6,8 +6,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     steps:
       # 1. Checkout & Python
