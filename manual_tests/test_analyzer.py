@@ -1,5 +1,8 @@
 # test_analyzer.py
+'''
+Resposnible for skill matching and scoring
 
+'''
 from backend.core.analyzer import (
     load_role_skills,
     compute_missing,
@@ -7,7 +10,7 @@ from backend.core.analyzer import (
 )
 
 # Simulate user input
-user_skills = ["Python", "SQL", "Scikit learn", "TensorFlow", "Maths"]
+user_skills = ["python", "SQL", "Scikit learn", "TensorFlow", "Maths"]
 
 # Load roles and choose one
 roles = load_role_skills()
