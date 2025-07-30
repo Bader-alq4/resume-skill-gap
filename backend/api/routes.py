@@ -14,7 +14,7 @@ from backend.core.analyzer import (
     compute_missing,
 )
 from backend.core.recommender import get_recommendations
-from .schemas import AnalyzeRequest, AnalyzeResponse
+from .schemas import AnalyzeResponse
 
 router = APIRouter()
 
