@@ -8,8 +8,10 @@ jobs:
     steps:
       # 1. Checkout & Python
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v4
-        with: python-version: "3.12"
+        with:
+          python-version: "3.12"
 
       # 2. Install deps + spaCy model (needed for your parser)
       - run: |
