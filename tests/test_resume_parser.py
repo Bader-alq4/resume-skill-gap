@@ -1,5 +1,3 @@
-import pytest
-
 from pathlib import Path
 from backend.core.parser import parse_resume, load_known_skills
 

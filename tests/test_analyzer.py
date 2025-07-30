@@ -1,5 +1,3 @@
-import pytest
-
 from backend.core.analyzer import (
     load_role_skills,
     compute_missing,

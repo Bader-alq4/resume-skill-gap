@@ -1,5 +1,3 @@
-import pytest
-
 from backend.core.parser import normalize_skill, load_known_skills
 
 '''

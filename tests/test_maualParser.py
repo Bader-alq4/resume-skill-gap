@@ -1,4 +1,3 @@
-import pytest
 from backend.core.parser import extract_user_skills_manual, load_known_skills
 
 '''

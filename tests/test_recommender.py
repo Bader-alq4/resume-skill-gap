@@ -1,5 +1,3 @@
-import pytest
-
 from backend.core.recommender import get_recommendations
 
 '''
