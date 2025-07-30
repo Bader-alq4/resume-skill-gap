@@ -34,4 +34,4 @@ jobs:
 
       # 3. Run test
       - name: Run tests
-        run: pytest --maxfail=1 --disable-warnings -q
+        run: pytest --maxfail=1 --disable-warnings -q --ignore=scripts-manual
