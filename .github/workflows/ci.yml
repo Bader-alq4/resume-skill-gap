@@ -3,7 +3,7 @@ name: CI
 on: 
   push:
     branches:
-      -main
+      - main
   pull_request:
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
           python -m spacy download en_core_web_sm
 
       - name: Lint with Ruff
-      run: ruff check .
+        run: ruff check .
 
       # 3. Run test
       - name: Run tests
