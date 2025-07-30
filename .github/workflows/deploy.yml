@@ -1,12 +1,17 @@
 name: CD
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+      if: ${{ github.event.workflow_run.conclusion == 'success' }}
+      runs-on: ubuntu-latest
+
     steps:
       # 1. Get the code
       - uses: actions/checkout@v4
@@ -19,13 +24,13 @@ jobs:
       # 3. Log in to ACR
       - run: az acr login --name ${{ secrets.ACR_NAME }}
 
-      # 4. Build & push backend
+      # 4. Build & push Docker Image
       - run: |
           docker build -f Dockerfile.backend \
             -t ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest .
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest
 
-      # 5. Deploy backend to its Web App
+      # 5. Deploy to Azure Web App
       - run: |
           az webapp config container set \
             --name ${{ secrets.BACKEND_APP }} \
