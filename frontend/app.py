@@ -86,17 +86,27 @@ if st.button("Analyze My Skills"):
     st.markdown("---")
     st.metric(label="Match Score", value=f"{result['match_score']}%")
 
-    col1, col2, col3 = st.columns(3)
+    # Add vertical space (2 blank lines)
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
+    col1, col2, col3, col4 = st.columns(4)
+
     with col1:
         st.subheader("Your Skills")
-        st.write(result["user_skills"])
-    with col2:
-        st.subheader("Missing Skills")
-        st.write(result["missing_skills"])
-    with col3:
-        st.subheader("Job Skills")
-        st.write(result["job_skills"])
+        for skill in result["user_skills"]:
+            st.markdown(f"- **{skill}**")
 
+    with col2:
+        st.subheader("Job Skills")
+        for skill in result["job_skills"]:
+            st.markdown(f"- **{skill}**")
+
+    with col3:
+        st.subheader("Missing Skills")
+        for skill in result["missing_skills"]:
+            st.markdown(f"- **{skill}**")
+
+    with col4:
         st.subheader("Skill Similarity Breakdown")
         # Build and display the similarity table
         sim_df = pd.DataFrame([
@@ -107,7 +117,25 @@ if st.button("Analyze My Skills"):
             }
             for js, detail in result["similarity_details"].items()
         ])
-        st.table(sim_df)   # ← actually render it
+
+        # Format Match Score to percent with 2 significant digits
+        sim_df["Match Score"] = sim_df["Match Score"].apply(lambda x: f"{x:.2f}".rstrip('0').rstrip('.') + '%')
+        
+        st.table(sim_df)
+
+    # Add vertical space (2 blank lines)
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
     st.subheader("Recommended Learning Path")
-    st.json(result["recommendations"])
+
+    with st.expander("Recommended Courses"):
+        for course in result["recommendations"]["courses"]:
+            st.markdown(f"- {course}")
+
+    with st.expander("Hands-on Projects"):
+        for project in result["recommendations"]["projects"]:
+            st.markdown(f"- {project}")
+
+    with st.expander("Suggested Certifications"):
+        for cert in result["recommendations"]["certifications"]:
+            st.markdown(f"- {cert}")
