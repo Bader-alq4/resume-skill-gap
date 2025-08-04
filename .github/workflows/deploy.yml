@@ -30,11 +30,27 @@ jobs:
             -t ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest .
           docker push ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest
 
+      # 4.a Build & push Docker Image (frontend)
+      - run: |
+          docker build -f Dockerfile.frontend \
+            -t ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.FRONTEND_APP }}:latest .
+          docker push ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.FRONTEND_APP }}:latest
+
+
       # 5. Deploy to Azure Web App
       - run: |
           az webapp config container set \
             --name ${{ secrets.BACKEND_APP }} \
             --resource-group ${{ secrets.RESOURCE_GROUP }} \
             --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.BACKEND_APP }}:latest \
+            --docker-registry-server-url https://${{ secrets.ACR_NAME }}.azurecr.io \
+            --only-show-errors
+
+      # 5.a Deploy to Azure Web App (frontend)
+      - run: |
+          az webapp config container set \
+            --name ${{ secrets.FRONTEND_APP }} \
+            --resource-group ${{ secrets.RESOURCE_GROUP }} \
+            --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.FRONTEND_APP }}:latest \
             --docker-registry-server-url https://${{ secrets.ACR_NAME }}.azurecr.io \
             --only-show-errors
