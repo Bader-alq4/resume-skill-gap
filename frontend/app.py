@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import os
+import pandas as pd
 
 # Load environment variables if needed
 from dotenv import load_dotenv
@@ -85,13 +86,28 @@ if st.button("Analyze My Skills"):
     st.markdown("---")
     st.metric(label="Match Score", value=f"{result['match_score']}%")
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         st.subheader("Your Skills")
         st.write(result["user_skills"])
     with col2:
         st.subheader("Missing Skills")
         st.write(result["missing_skills"])
+    with col3:
+        st.subheader("Job Skills")
+        st.write(result["job_skills"])
+
+        st.subheader("Skill Similarity Breakdown")
+        # Build and display the similarity table
+        sim_df = pd.DataFrame([
+            {
+                "Job Skill": js,
+                "Matched Skill": detail["matched_skill"],
+                "Match Score": detail["score"]
+            }
+            for js, detail in result["similarity_details"].items()
+        ])
+        st.table(sim_df)   # ← actually render it
 
     st.subheader("Recommended Learning Path")
     st.json(result["recommendations"])

@@ -12,6 +12,7 @@ from backend.core.analyzer import (
     load_role_skills,
     compute_match_score,
     compute_missing,
+    compute_similarity_details,
 )
 from backend.core.recommender import get_recommendations
 from .schemas import AnalyzeResponse
@@ -65,12 +66,19 @@ async def analyze(
     role_skills = roles_map[role]
     score = compute_match_score(user_skills, role_skills)
     missing = compute_missing(user_skills, role_skills)
+    job_skills = role_skills
+
+    # compute per-skill similarity details
+    similarity_details = compute_similarity_details(user_skills, job_skills)
+
     recs = get_recommendations(missing)
 
     # Step 4: Return response
     return AnalyzeResponse(
         match_score=score,
         user_skills=user_skills,
+        job_skills=job_skills,                
         missing_skills=missing,
         recommendations=recs,
+        similarity_details=similarity_details,
     )

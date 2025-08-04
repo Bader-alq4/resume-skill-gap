@@ -92,6 +92,43 @@ def compute_per_skill_score(user_skills: list[str], role_skills: list[str]) -> f
     score = float(np.mean(sims)) * 100.0
     return round(score, 2)
 
+
+
+def compute_similarity_details(
+    user_skills: list[str],
+    job_skills: list[str]
+) -> dict[str, dict[str, float | str]]:
+    """
+    For each job_skill, compute:
+      - which user_skill gave the highest cosine sim
+      - that sim (%) rounded to 2 decimals
+    """
+    # 1. Embed every unique skill once
+    all_skills = list({*user_skills, *job_skills})
+    embeds = get_embeddings(all_skills)
+    idx = {skill: i for i, skill in enumerate(all_skills)}
+    norms = np.linalg.norm(embeds, axis=1)
+
+    details: dict[str, dict[str, float | str]] = {}
+    for js in job_skills:
+        r_vec = embeds[idx[js]]
+        r_norm = norms[idx[js]]
+        best_sim = 0.0
+        best_match = None
+        for us in user_skills:
+            u_vec = embeds[idx[us]]
+            u_norm = norms[idx[us]]
+            sim = float(np.dot(r_vec, u_vec) / (r_norm * u_norm + 1e-8))
+            if sim > best_sim:
+                best_sim = sim
+                best_match = us
+        details[js] = {
+            "matched_skill": best_match or "",
+            "score": round(best_sim * 100, 2)   # percent
+        }
+    return details
+
+
 def compute_match_score(user_skills: list[str], role_skills: list[str]) -> float:
     """
     Alias to compute_per_skill_score for backward compatibility.
