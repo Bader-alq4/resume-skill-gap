@@ -21,8 +21,9 @@ It integrates **OpenAI’s GPT API** to generate personalized upskilling recomme
 
 ---
 
-## Project Structure
+## 🧩 Project Structure
 
+```text
 main.py -> Initializes FastAPI app
 routes.py -> REST API routes
 schemas.py -> Data models (Pydantic)
@@ -32,7 +33,7 @@ analyzer.py -> Computes skill similarity & gaps
 recommender.py -> OpenAI-powered learning suggestions
 known_skills.json -> Skill taxonomy reference
 roles.json -> Role-to-skill benchmark mapping
-
+```
 ---
 
 ## Tech Stack
