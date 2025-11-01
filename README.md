@@ -21,7 +21,7 @@ It integrates **OpenAI’s GPT API** to generate personalized upskilling recomme
 
 ---
 
-## 🧩 Project Structure
+## Project Structure
 
 ```text
 main.py -> Initializes FastAPI app
